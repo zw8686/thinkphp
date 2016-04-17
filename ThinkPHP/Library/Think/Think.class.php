@@ -266,43 +266,26 @@ class Think
      * @param int $errline 错误行数
      * @return void
      */
-    public static function appError($errno, $errstr, $errfile, $errline)
-    {
-        switch ($errno) {
-            case E_ERROR:
-            case E_PARSE:
-            case E_CORE_ERROR:
-            case E_COMPILE_ERROR:
-            case E_USER_ERROR:
-                ob_end_clean();
-                $errorStr = "$errstr " . $errfile . " 第 $errline 行.";
-                if (C('LOG_RECORD')) {
-                    Log::write("[$errno] " . $errorStr, Log::ERR);
-                }
-
-                self::halt($errorStr);
-                break;
-            default:
-                $errorStr = "[$errno] $errstr " . $errfile . " 第 $errline 行.";
-                self::trace($errorStr, '', 'NOTIC');
-                break;
-        }
+    static public function appError($errno, $errstr, $errfile, $errline) {
+            $errorStr = "[$errno] $errstr ".$errfile." 第 $errline 行.";
+            self::trace($errorStr,'','NOTIC');
     }
-
+    
     // 致命错误捕获
-    public static function fatalError()
-    {
+    static public function fatalError() {
         Log::save();
         if ($e = error_get_last()) {
-            switch ($e['type']) {
-                case E_ERROR:
-                case E_PARSE:
-                case E_CORE_ERROR:
-                case E_COMPILE_ERROR:
-                case E_USER_ERROR:
-                    ob_end_clean();
-                    self::halt($e);
-                    break;
+            switch($e['type']){
+              case E_ERROR:
+              case E_PARSE:
+              case E_CORE_ERROR:
+              case E_COMPILE_ERROR:
+              case E_USER_ERROR:  
+                $errorStr = $e['type'].' '.$e['message'].' '.$e['file'].' 第 '.$e['line'].' 行.';
+                if(C('LOG_RECORD')) Log::write($errorStr,Log::ERR);
+                ob_end_clean();
+                self::halt($e);
+                break;
             }
         }
     }
